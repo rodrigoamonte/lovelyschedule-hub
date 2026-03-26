@@ -1,44 +1,54 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { Bell, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Bell, CheckCheck, Mail, MailOpen } from 'lucide-react';
 
 export default function NotificationsPage() {
   const { user } = useAuth();
-  const { notifications, markNotificationRead } = useData();
+  const { notifications, markNotificationRead, markAllNotificationsRead } = useData();
 
-  const userNotifs = notifications
-    .filter(n => n.userId === user?.id)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  if (!user) return null;
 
-  const unread = userNotifs.filter(n => !n.read);
+  const myNotifs = notifications.filter(n => n.userId === user.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const unreadCount = myNotifs.filter(n => !n.read).length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl text-foreground">Notificações</h1>
-        <p className="text-sm text-muted-foreground">{unread.length} não lida{unread.length !== 1 ? 's' : ''}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Bell className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl text-foreground">Notificações</h1>
+            <p className="text-sm text-muted-foreground">{unreadCount} não lida(s)</p>
+          </div>
+        </div>
+        {unreadCount > 0 && (
+          <Button variant="outline" size="sm" onClick={() => markAllNotificationsRead(user.id)}>
+            <CheckCheck className="mr-2 h-4 w-4" /> Marcar todas como lidas
+          </Button>
+        )}
       </div>
 
       <div className="space-y-2">
-        {userNotifs.length === 0 ? (
-          <div className="rounded-xl bg-card shadow-card p-8 text-center text-sm text-muted-foreground">
-            <Bell className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-            Nenhuma notificação.
-          </div>
+        {myNotifs.length === 0 ? (
+          <div className="rounded-xl bg-card shadow-card p-8 text-center text-muted-foreground text-sm">Nenhuma notificação.</div>
         ) : (
-          userNotifs.map(n => (
-            <div key={n.id} className={`rounded-xl p-4 shadow-card flex items-start gap-3 transition-colors ${n.read ? 'bg-card' : 'bg-primary/5 border border-primary/10'}`}>
-              <div className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-primary'}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-foreground">{n.message}</p>
-                <p className="text-xs text-muted-foreground mt-1">{new Date(n.createdAt).toLocaleString('pt-BR')}</p>
+          myNotifs.map(n => (
+            <div
+              key={n.id}
+              className={`rounded-xl bg-card shadow-card p-4 flex items-start gap-3 cursor-pointer transition-colors ${!n.read ? 'border-l-4 border-l-primary' : ''}`}
+              onClick={() => !n.read && markNotificationRead(n.id)}
+            >
+              <div className="mt-0.5">
+                {n.read ? <MailOpen className="h-4 w-4 text-muted-foreground" /> : <Mail className="h-4 w-4 text-primary" />}
               </div>
-              {!n.read && (
-                <Button size="sm" variant="ghost" onClick={() => markNotificationRead(n.id)} className="shrink-0">
-                  <Check className="h-4 w-4" />
-                </Button>
-              )}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm ${!n.read ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>{n.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{new Date(n.createdAt).toLocaleString('pt-BR')}</p>
+              </div>
             </div>
           ))
         )}
