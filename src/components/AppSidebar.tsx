@@ -1,4 +1,4 @@
-import { LayoutDashboard, Truck, Building2, Clock, CalendarCheck, CheckSquare, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, ClipboardList, CheckSquare, History, Building2, Clock, Users, Bell, LogOut, Warehouse } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,15 +8,26 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { ROLE_LABELS } from '@/lib/mock-data';
 
-const allItems = [
-  { title: 'Painel Diário', url: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'gestor'] },
-  { title: 'Fornecedores', url: '/fornecedores', icon: Truck, roles: ['admin'] },
-  { title: 'Unidades', url: '/unidades', icon: Building2, roles: ['admin'] },
-  { title: 'Janelas', url: '/janelas', icon: Clock, roles: ['admin', 'gestor'] },
-  { title: 'Agendar Entrega', url: '/agendar', icon: CalendarCheck, roles: ['fornecedor'] },
-  { title: 'Aprovações', url: '/aprovacoes', icon: CheckSquare, roles: ['admin', 'gestor'] },
-  { title: 'Notificações', url: '/notificacoes', icon: Bell, roles: ['admin', 'gestor', 'fornecedor'] },
+type NavItem = { title: string; url: string; icon: React.ElementType; roles: string[] };
+
+const allItems: NavItem[] = [
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'assistente', 'deposito', 'fornecedor'] },
+  // Fornecedor
+  { title: 'Novo Agendamento', url: '/novo-agendamento', icon: CalendarPlus, roles: ['fornecedor'] },
+  { title: 'Meus Agendamentos', url: '/meus-agendamentos', icon: ClipboardList, roles: ['fornecedor'] },
+  // Assistente
+  { title: 'Solicitações Pendentes', url: '/solicitacoes', icon: CheckSquare, roles: ['assistente'] },
+  { title: 'Histórico de Decisões', url: '/historico', icon: History, roles: ['assistente'] },
+  // Depósito
+  { title: 'Mural Operacional', url: '/mural', icon: Warehouse, roles: ['deposito'] },
+  // Admin
+  { title: 'Lojas', url: '/lojas', icon: Building2, roles: ['admin'] },
+  { title: 'Horários', url: '/horarios', icon: Clock, roles: ['admin'] },
+  { title: 'Usuários', url: '/usuarios', icon: Users, roles: ['admin'] },
+  // All
+  { title: 'Notificações', url: '/notificacoes', icon: Bell, roles: ['admin', 'assistente', 'deposito', 'fornecedor'] },
 ];
 
 export function AppSidebar() {
@@ -71,7 +82,7 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="mb-2 px-2">
             <p className="text-xs font-medium text-sidebar-foreground">{user.name}</p>
-            <p className="text-[10px] text-sidebar-foreground/50">{user.email}</p>
+            <p className="text-[10px] text-sidebar-foreground/50">{ROLE_LABELS[user.role]}</p>
           </div>
         )}
         <Button variant="ghost" size="sm" onClick={logout} className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent">

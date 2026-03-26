@@ -8,11 +8,14 @@ import { DataProvider } from '@/contexts/DataContext';
 import { AppLayout } from '@/components/AppLayout';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
-import Suppliers from '@/pages/Suppliers';
-import UnitsPage from '@/pages/Units';
-import WindowsPage from '@/pages/Windows';
-import Scheduling from '@/pages/Scheduling';
-import Approvals from '@/pages/Approvals';
+import NewAppointment from '@/pages/supplier/NewAppointment';
+import MyAppointments from '@/pages/supplier/MyAppointments';
+import PendingRequests from '@/pages/assistant/PendingRequests';
+import DecisionHistory from '@/pages/assistant/DecisionHistory';
+import OperationalBoard from '@/pages/depot/OperationalBoard';
+import StoresPage from '@/pages/admin/Stores';
+import SchedulesPage from '@/pages/admin/Schedules';
+import UsersPage from '@/pages/admin/UsersPage';
 import NotificationsPage from '@/pages/Notifications';
 import NotFound from '@/pages/NotFound';
 
@@ -31,11 +34,14 @@ const App = () => (
               <Route path="/" element={<AppLayout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="fornecedores" element={<Suppliers />} />
-                <Route path="unidades" element={<UnitsPage />} />
-                <Route path="janelas" element={<WindowsPage />} />
-                <Route path="agendar" element={<Scheduling />} />
-                <Route path="aprovacoes" element={<Approvals />} />
+                <Route path="novo-agendamento" element={<NewAppointment />} />
+                <Route path="meus-agendamentos" element={<MyAppointments />} />
+                <Route path="solicitacoes" element={<PendingRequests />} />
+                <Route path="historico" element={<DecisionHistory />} />
+                <Route path="mural" element={<OperationalBoard />} />
+                <Route path="lojas" element={<StoresPage />} />
+                <Route path="horarios" element={<SchedulesPage />} />
+                <Route path="usuarios" element={<UsersPage />} />
                 <Route path="notificacoes" element={<NotificationsPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />

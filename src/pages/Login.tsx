@@ -4,11 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Truck } from 'lucide-react';
 
 const roleRedirects: Record<string, string> = {
   admin: '/dashboard',
-  gestor: '/dashboard',
-  fornecedor: '/agendar',
+  assistente: '/dashboard',
+  deposito: '/dashboard',
+  fornecedor: '/dashboard',
 };
 
 export default function Login() {
@@ -23,22 +25,23 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(email, password);
-    if (success) {
-      const u = { email };
-      const role = email.includes('admin') ? 'admin' : email.includes('gestor') ? 'gestor' : 'fornecedor';
-      navigate(roleRedirects[role] ?? '/dashboard');
+    const result = login(email, password);
+    if (result.success) {
+      navigate('/dashboard');
     } else {
-      setError('E-mail ou senha inválidos.');
+      setError(result.error ?? 'Erro ao fazer login.');
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center h-14 w-14 rounded-xl bg-primary text-primary-foreground mx-auto">
+            <Truck className="h-7 w-7" />
+          </div>
           <h1 className="text-3xl font-bold text-foreground">AgendaLog</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Gestão inteligente de entregas</p>
+          <p className="text-sm text-muted-foreground">Sistema de Agendamento de Entregas</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-card p-6 shadow-card">
           <div className="space-y-2">
@@ -52,10 +55,11 @@ export default function Login() {
           {error && <p className="text-xs text-destructive">{error}</p>}
           <Button type="submit" className="w-full">Entrar</Button>
           <div className="rounded-lg bg-secondary p-3 text-xs text-muted-foreground space-y-1">
-            <p className="font-medium text-secondary-foreground">Contas de demo:</p>
-            <p>admin@agendlog.com / admin</p>
-            <p>gestor@agendlog.com / gestor</p>
-            <p>fornecedor@agendlog.com / fornecedor</p>
+            <p className="font-medium text-secondary-foreground">Contas de demonstração:</p>
+            <p><span className="font-medium">Admin:</span> admin@agendlog.com / admin123</p>
+            <p><span className="font-medium">Assistente:</span> assistente@agendlog.com / assist123</p>
+            <p><span className="font-medium">Depósito:</span> deposito@agendlog.com / depo123</p>
+            <p><span className="font-medium">Fornecedor:</span> fornecedor@agendlog.com / forn123</p>
           </div>
         </form>
       </div>
