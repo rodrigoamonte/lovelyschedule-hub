@@ -1,24 +1,17 @@
-import { cn } from '@/lib/utils';
-import { type AppointmentStatus, STATUS_LABELS } from '@/lib/mock-data';
+import { Badge } from '@/components/ui/badge';
+import { STATUS_LABELS, type AppointmentStatus } from '@/lib/mock-data';
 
 const statusStyles: Record<AppointmentStatus, string> = {
-  pendente: 'bg-warning/15 text-warning',
-  aprovado: 'bg-accent/15 text-accent',
-  rejeitado: 'bg-destructive/15 text-destructive',
-  aguardando: 'bg-primary/15 text-primary',
-  chegou: 'bg-accent/15 text-accent',
-  atrasado: 'bg-destructive/15 text-destructive',
-  concluido: 'bg-muted text-muted-foreground',
+  pendente: 'bg-warning/15 text-warning border-warning/30',
+  aprovado: 'bg-accent/15 text-accent border-accent/30',
+  rejeitado: 'bg-destructive/15 text-destructive border-destructive/30',
+  cancelado: 'bg-muted text-muted-foreground border-border',
 };
 
-export function StatusBadge({ status, className }: { status: AppointmentStatus; className?: string }) {
+export function StatusBadge({ status }: { status: AppointmentStatus }) {
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-      statusStyles[status],
-      className,
-    )}>
+    <Badge variant="outline" className={`${statusStyles[status]} font-medium text-xs`}>
       {STATUS_LABELS[status]}
-    </span>
+    </Badge>
   );
 }
