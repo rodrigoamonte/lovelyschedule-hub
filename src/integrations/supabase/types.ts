@@ -14,16 +14,350 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointment_history: {
+        Row: {
+          action: string
+          appointment_id: string
+          created_at: string
+          description: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          appointment_id: string
+          created_at?: string
+          description: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          appointment_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_history_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          cargo_type: Database["public"]["Enums"]["cargo_type"]
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          store_id: string
+          supplier_id: string
+          time: string
+          updated_at: string
+          volume_estimate: string | null
+        }
+        Insert: {
+          cargo_type: Database["public"]["Enums"]["cargo_type"]
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          store_id: string
+          supplier_id: string
+          time: string
+          updated_at?: string
+          volume_estimate?: string | null
+        }
+        Update: {
+          cargo_type?: Database["public"]["Enums"]["cargo_type"]
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          store_id?: string
+          supplier_id?: string
+          time?: string
+          updated_at?: string
+          volume_estimate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          active: boolean
+          address: string
+          city: string
+          created_at: string
+          daily_capacity: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address: string
+          city: string
+          created_at?: string
+          daily_capacity?: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string
+          city?: string
+          created_at?: string
+          daily_capacity?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          active: boolean
+          cnpj: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          nome_fantasia: string
+          razao_social: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          cnpj: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          nome_fantasia: string
+          razao_social: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          cnpj?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          nome_fantasia?: string
+          razao_social?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      time_slots: {
+        Row: {
+          active: boolean
+          created_at: string
+          date: string
+          id: string
+          max_capacity: number
+          store_id: string
+          time: string
+          updated_at: string
+          used_capacity: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          date: string
+          id?: string
+          max_capacity?: number
+          store_id: string
+          time: string
+          updated_at?: string
+          used_capacity?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          max_capacity?: number
+          store_id?: string
+          time?: string
+          updated_at?: string
+          used_capacity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_slots_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "fornecedor" | "assistente" | "deposito" | "admin"
+      appointment_status:
+        | "pendente"
+        | "aprovado"
+        | "rejeitado"
+        | "cancelado"
+        | "concluido"
+      cargo_type: "refrigerada" | "seca" | "perecivel" | "congelada" | "outros"
+      notification_type: "status_change" | "reminder" | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +484,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["fornecedor", "assistente", "deposito", "admin"],
+      appointment_status: [
+        "pendente",
+        "aprovado",
+        "rejeitado",
+        "cancelado",
+        "concluido",
+      ],
+      cargo_type: ["refrigerada", "seca", "perecivel", "congelada", "outros"],
+      notification_type: ["status_change", "reminder", "system"],
+    },
   },
 } as const
