@@ -1,73 +1,118 @@
-# Welcome to your Lovable project
+# Agendlog
 
-## Project info
+Agendlog é uma plataforma para a gestão de agendamentos e logística de depósitos. O sistema implementa um controle de acesso baseado em funções (RBAC), oferecendo interfaces específicas para Administradores, Assistentes, Depósitos e Fornecedores.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+A solução é composta por uma API (Node.js/Express/Prisma), um cliente web (React/Vite) e um banco de dados relacional (MySQL), totalmente conteinerizada com Docker.
 
-## How can I edit this code?
+## Pré-requisitos
 
-There are several ways of editing your application.
+Para a correta execução do projeto, é necessário possuir as seguintes ferramentas instaladas:
 
-**Use Lovable**
+* [Docker Desktop / Engine](https://www.docker.com/get-started/) (>= 20.10.x)
+* [Docker Compose](https://docs.docker.com/compose/install/) (>= 2.x.x)
+* [Git](https://git-scm.com/downloads)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Configuração Inicial
 
-Changes made via Lovable will be committed automatically to this repo.
+Siga os passos abaixo para preparar o ambiente de execução:
 
-**Use your preferred IDE**
+1. **Clonar o repositório:**
+   ```bash
+   git clone https://github.com/rodrigoamonte/lovelyschedule-hub.git
+   cd agendlog
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Configurar variáveis de ambiente:**
+   Copie o arquivo de exemplo e edite as definições conforme necessário.
+   ```bash
+   cp .env.example .env
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Gerar chaves de segurança:**
+   Utilize o seguinte comando para gerar valores seguros para as variáveis `DB_ROOT_PASSWORD`, `JWT_SECRET` e `ADMIN_PASSWORD` no arquivo `.env`:
+   ```bash
+   openssl rand -base64 32
+   ```
 
-Follow these steps:
+## Inicialização da Infraestrutura
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Para compilar as imagens e iniciar os serviços em segundo plano:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+docker compose up --build -d
 ```
 
-**Edit a file directly in GitHub**
+O sistema estará acessível através do gateway em `http://localhost:{APP_PORT_HOST}`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Gestão de Banco de Dados (Prisma)
 
-**Use GitHub Codespaces**
+As operações de esquema e persistência devem ser realizadas através do Prisma ORM integrado no container da API.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Migração Inicial (First Migration)
+Para criar a estrutura inicial das tabelas:
+```bash
+docker compose exec api npx prisma migrate dev --name init
+```
 
-## What technologies are used for this project?
+### Sincronização de Esquema (Sync DB)
+Para forçar a sincronização do banco de dados com o `schema.prisma` sem gerar arquivos de migração (indicado para desenvolvimento ágil estrutural):
+```bash
+docker exec -it agendlog-api npx prisma db push
+```
 
-This project is built with:
+### Geração do Cliente Prisma
+Caso realize alterações manuais no esquema, atualize os tipos do `@prisma/client`:
+```bash
+DATABASE_URL="mysql://root:<sua_senha>@localhost:3306/agendlog" npx prisma generate
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Fluxo de Desenvolvimento
 
-## How can I deploy this project?
+A arquitetura do projeto utiliza imagens estáticas construídas a partir de `Dockerfiles` para garantir a máxima consistência entre os ambientes de desenvolvimento e produção.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Para aplicar alterações realizadas no código-fonte, é necessário reconstruir as imagens dos serviços:
 
-## Can I connect a custom domain to my Lovable project?
+* **Aplicar alterações em todos os serviços:**
+  ```bash
+  docker compose up --build -d
+  ```
 
-Yes, you can!
+* **Aplicar alterações em um serviço específico (ex: api):**
+  ```bash
+  docker compose up --build -d api
+  ```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Comandos Úteis de Operação
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+* **Monitoramento de Logs:** Para acompanhar a saída padrão da API em tempo real:
+  ```bash
+  docker compose logs -f api
+  ```
+* **Acesso Interativo:** Para executar comandos diretamente dentro do container da API:
+  ```bash
+  docker compose exec api sh
+  ```
+* **Encerramento da Infraestrutura:** Para parar os containers:
+  ```bash
+  docker compose down
+  ```
+
+## Implantação em Produção
+
+Para instanciar o sistema em um ambiente produtivo, siga estas diretrizes essenciais:
+
+1. Altere a variável `ENVIRONMENT` para `production`.
+2. Assegure-se de que a `VITE_API_URL` aponte para o domínio público com protocolo seguro (HTTPS).
+3. Utilize exclusivamente o comando de deploy para o Prisma, garantindo a aplicação segura do histórico de migrações:
+   ```bash
+   docker compose exec api npx prisma migrate deploy
+   ```
+
+## Estrutura do Repositório
+
+O projeto adota uma arquitetura modular de monorepo lógico:
+
+* `agendlog-api/`: Backend construído em Node.js, Express, TypeScript e Prisma.
+* `agendlog-app/`: Frontend construído com React, Vite e Tailwind CSS.
+* `nginx/`: Definições do proxy reverso, atuando como API Gateway estático.
+* `prisma/`: Definição de esquema relacional (`schema.prisma`) e artefatos de migração.

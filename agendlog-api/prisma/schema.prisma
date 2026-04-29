@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  CHECKER
+  SUPPLIER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CompanyType {
+  CARRIER
+  WAREHOUSE
+}
+
+enum AppointmentStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SCHEDULED
+  INSPECTION
+  COMPLETED
+  CANCELLED
+  MAINTENANCE
+}
+
+enum DeliverySlotStatus {
+  AVAILABLE
+  RESERVED
+  BLOCKED
+  MAINTENANCE
+}
+
+model Company {
+  id        String      @id @default(uuid())
+  name      String
+  cnpj      String?     @unique
+  email     String?     @unique
+  phone     String?
+  type      CompanyType @default(CARRIER)
+  users     User[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
+model User {
+  id                  String               @id @default(uuid())
+  name                String
+  email               String               @unique
+  password            String
+  phone               String?
+  role                Role                 @default(SUPPLIER)
+  status              UserStatus           @default(ACTIVE)
+  companyId           String?
+  company             Company?             @relation(fields: [companyId], references: [id])
+  supplierAppointments  Appointment[]        @relation("SupplierAppointments")
+  checkerAppointments Appointment[]        @relation("CheckerAppointments")
+  createdAppointments Appointment[]        @relation("CreatedAppointments")
+  changedHistories    AppointmentHistory[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Store {
+  id              String                @id @default(uuid())
+  name            String
+  code            String                @unique
+  address         String
+  active          Boolean               @default(true)
+  appointments    Appointment[]
+  operatingHours  StoreOperatingHour[]
+  deliveryWindows StoreDeliveryWindow[]
+  bays            Bay[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  deletedAt       DateTime?
+
+  @@index([deletedAt])
+}
+
+model StoreOperatingHour {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  openTime  String
+  closeTime String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([storeId, dayOfWeek])
+  @@index([deletedAt])
+}
+
+model StoreDeliveryWindow {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([storeId])
+  @@index([deletedAt])
+}
+
+model Bay {
+  id            String         @id @default(uuid())
+  name          String
+  code          String         @unique
+  location      String?
+  active        Boolean        @default(true)
+  storeId       String
+  store         Store          @relation(fields: [storeId], references: [id])
+  deliverySlots DeliverySlot[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@index([storeId])
+}
+
+model DeliverySlot {
+  id           String             @id @default(uuid())
+  bayId        String
+  bay          Bay                @relation(fields: [bayId], references: [id])
+  startTime    DateTime
+  endTime      DateTime
+  maxCapacity  Int                @default(1)
+  usedCapacity Int                @default(0)
+  status       DeliverySlotStatus @default(AVAILABLE)
+  appointments Appointment[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  deletedAt    DateTime?
+
+  @@unique([bayId, startTime, endTime])
+  @@index([bayId, startTime])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model Appointment {
+  id            String               @id @default(uuid())
+  storeId       String
+  store         Store                @relation(fields: [storeId], references: [id])
+  supplierId      String
+  supplier        User                 @relation("SupplierAppointments", fields: [supplierId], references: [id])
+  deliverySlots DeliverySlot[]
+  checkerId     String?
+  checker       User?                @relation("CheckerAppointments", fields: [checkerId], references: [id])
+  createdById   String
+  createdBy     User                 @relation("CreatedAppointments", fields: [createdById], references: [id])
+  status        AppointmentStatus    @default(PENDING)
+  merchandise   String
+  notes         String?
+  orderNumber   String?
+  totalValue    Int?
+  statusReason  String?
+  history       AppointmentHistory[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  deletedAt     DateTime?
+
+  @@index([storeId])
+  @@index([supplierId])
+  @@index([createdById])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model AppointmentHistory {
+  id             String             @id @default(uuid())
+  appointmentId  String
+  appointment    Appointment        @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  status         AppointmentStatus
+  previousStatus AppointmentStatus?
+  reason         String?
+  changedById    String?
+  changedBy      User?              @relation(fields: [changedById], references: [id])
+  createdAt      DateTime           @default(now())
+
+  @@index([appointmentId])
+}
